@@ -62,11 +62,13 @@ detectedChangeMapNormalized, timeVector1FeatureAggregated, timeVector2FeatureAgg
 # Getting CD map from normalized CD maps
 
 
-cdMap = np.zeros(detectedChangeMapNormalized.shape, dtype=bool)
 otsuThreshold = filters.threshold_otsu(detectedChangeMapNormalized)
 cdMap = detectedChangeMapNormalized > otsuThreshold
 cdMap = morphology.binary_erosion(cdMap)
 cdMap = morphology.binary_dilation(cdMap)
+
+# cv2.imwrite(resultPath,((1-cdMap)*255).astype('uint8'))
+Image.fromarray(((1 - cdMap) * 255).astype(np.uint8)).save(resultPath)
 
 # Computing quantitative indices
 referenceImageTo1DArray = (referenceImageTransformed).ravel()
@@ -85,34 +87,14 @@ jacc = tp / (tp + fp + fn)  # https://www.mathworks.com/help/images/ref/jaccard.
 dice = 2 * tp / (2 * tp + fp + fn)  # https://www.mathworks.com/help/images/ref/dice.html
 
 metrics = {
-    'acc': acc,
-    'precision': precision,
-    'recall': recall,
-    'fpr': fpr,
-    'spec': spec,
-    'error': error,
-    'f1': f1,
-    'jacc': jacc,
-    'dice': dice,
+    'acc': acc if not np.isnan(acc) else 0,
+    'precision': precision if not np.isnan(precision) else 0,
+    'recall': recall if not np.isnan(recall) else 0,
+    'fpr': fpr if not np.isnan(fpr) else 0,
+    'spec': spec if not np.isnan(spec) else 0,
+    'error': error if not np.isnan(error) else 0,
+    'f1': f1 if not np.isnan(f1) else 0,
+    'jacc': jacc if not np.isnan(jacc) else 0,
+    'dice': dice if not np.isnan(dice) else 0,
 }
 print(metrics)
-
-# getting details of confusion matrix: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html#sklearn.metrics.confusion_matrix
-trueNegative, falsePositive, falseNegative, truePositive = confusionMatrixEstimated.ravel()
-sensitivity = truePositive / (truePositive + falseNegative)
-specificity = trueNegative / (trueNegative + falsePositive)
-accuracy = (truePositive + trueNegative) / (truePositive + trueNegative + falsePositive + falseNegative)
-print('Sensitivity is:' + str(sensitivity))
-print('Specificity is:' + str(specificity))
-print('Accuracy is:' + str(accuracy))
-print('Missed alarm are:' + str(falseNegative))
-print('False alarm are:' + str(falsePositive))
-
-# ignoring label 2 while computing F1 score
-referenceImageTo1DArrayInvalidIndices = np.argwhere(referenceImageTo1DArray == 2)
-referenceImageTo1DArrayValidIndices = np.setdiff1d(np.arange(len(referenceImageTo1DArray)), referenceImageTo1DArrayInvalidIndices)
-f1Score = f1_score(y_true=referenceImageTo1DArray[referenceImageTo1DArrayValidIndices], y_pred=cdMapTo1DArray[referenceImageTo1DArrayValidIndices])
-print('F1 score is:' + str(f1Score))
-print('...')
-
-# cv2.imwrite(resultPath,((1-cdMap)*255).astype('uint8'))
