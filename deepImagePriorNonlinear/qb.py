@@ -73,7 +73,7 @@ referenceImageTo1DArray = (referenceImageTransformed).ravel()
 cdMapTo1DArray = cdMap.astype(int).ravel()
 confusionMatrixEstimated = confusion_matrix(y_true=referenceImageTo1DArray, y_pred=cdMapTo1DArray, labels=[0, 1])
 
-tn, fp, fn, tp = confusionMatrixEstimated.T
+tn, fp, fn, tp = confusionMatrixEstimated.ravel()
 acc = (tn + tp) / (tn + tp + fp + fn)  # Accuracy (all correct / all)
 precision = tp / (tp + fp)  # Precision (true positives / predicted positives)
 recall = tp / (tp + fn)  # Sensitivity aka Recall (true positives / all actual positives)
