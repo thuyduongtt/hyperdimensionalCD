@@ -5,7 +5,8 @@ import torch
 from PIL import Image
 from skimage import filters
 from skimage import morphology
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix
+from pathlib import Path
 
 from featureExtractionModule import deepPriorCd
 from utilities import saturateSomePercentileBandwise
@@ -30,7 +31,7 @@ np.random.seed(manualSeed)
 preChangeDataPath = '../datasets/QB_original/t1.bmp'
 postChangeDataPath = '../datasets/QB_original/t2.bmp'
 referencePath = '../datasets/QB_original/gt.bmp'
-resultPath = '../results/QB/QBDeepImagePriorNonlinear.png'
+resultPath = '../results/QB/'
 
 # Reading images and reference
 preChangeImage = np.array(Image.open(preChangeDataPath))
@@ -68,7 +69,9 @@ cdMap = morphology.binary_erosion(cdMap)
 cdMap = morphology.binary_dilation(cdMap)
 
 # cv2.imwrite(resultPath,((1-cdMap)*255).astype('uint8'))
-Image.fromarray(((1 - cdMap) * 255).astype(np.uint8)).save(resultPath)
+if not Path(resultPath).exists():
+    Path(resultPath).mkdir(parents=True)
+Image.fromarray(((1 - cdMap) * 255).astype(np.uint8)).save(resultPath + 'result.png')
 
 # Computing quantitative indices
 referenceImageTo1DArray = (referenceImageTransformed).ravel()
