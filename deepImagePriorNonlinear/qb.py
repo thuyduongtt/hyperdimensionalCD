@@ -73,6 +73,30 @@ referenceImageTo1DArray = (referenceImageTransformed).ravel()
 cdMapTo1DArray = cdMap.astype(int).ravel()
 confusionMatrixEstimated = confusion_matrix(y_true=referenceImageTo1DArray, y_pred=cdMapTo1DArray, labels=[0, 1])
 
+tn, fp, fn, tp = confusionMatrixEstimated.T
+acc = (tn + tp) / (tn + tp + fp + fn)  # Accuracy (all correct / all)
+precision = tp / (tp + fp)  # Precision (true positives / predicted positives)
+recall = tp / (tp + fn)  # Sensitivity aka Recall (true positives / all actual positives)
+fpr = fp / (fp + tn)  # False Positive Rate (Type I error)
+spec = tn / (tn + fp)  # Specificity (true negatives / all actual negatives)
+error = (fn + fp) / (tn + tp + fp + fn)  # Misclassification (all incorrect / all)
+f1 = (2 * precision * recall) / (precision + recall)
+jacc = tp / (tp + fp + fn)  # https://www.mathworks.com/help/images/ref/jaccard.html
+dice = 2 * tp / (2 * tp + fp + fn)  # https://www.mathworks.com/help/images/ref/dice.html
+
+metrics = {
+    'acc': acc,
+    'precision': precision,
+    'recall': recall,
+    'fpr': fpr,
+    'spec': spec,
+    'error': error,
+    'f1': f1,
+    'jacc': jacc,
+    'dice': dice,
+}
+print(metrics)
+
 # getting details of confusion matrix: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html#sklearn.metrics.confusion_matrix
 trueNegative, falsePositive, falseNegative, truePositive = confusionMatrixEstimated.ravel()
 sensitivity = truePositive / (truePositive + falseNegative)
